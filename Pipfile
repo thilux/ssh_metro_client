@@ -9,6 +9,7 @@ name = "pypi"
 
 requests = "*"
 pexpect = "*"
+argparse = "*"
 
 
 [dev-packages]
