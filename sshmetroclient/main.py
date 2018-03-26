@@ -16,7 +16,7 @@ parser.add_argument('ssh_metro_server_string', help='The specification of the SS
                                                     ' assumed.')
 
 
-def __get_target_connection_details(target_connection_string):
+def _get_target_connection_details(target_connection_string):
     """
     Returns a tuple with the raw connection details for the target machine extracted from the connection string provided
     in the application arguments. It is a specialized parser of that string.
@@ -66,7 +66,7 @@ def __get_target_connection_details(target_connection_string):
         return user, host, port
 
 
-def __get_ssh_metro_server_connection_detail(ssh_metro_server_conn_string):
+def _get_ssh_metro_server_connection_detail(ssh_metro_server_conn_string):
     """
     Returns a tuple with the raw connection details for the SSH metro server provided in the application arguments. It
     is a specified parser for that string.
@@ -95,14 +95,14 @@ def main():
     """
     args = parser.parse_args()
 
-    connection_string_tuple = __get_target_connection_details(args.target_connection_string)
+    connection_string_tuple = _get_target_connection_details(args.target_connection_string)
     if len(connection_string_tuple) == 4:
         user, password, host, port = connection_string_tuple
     else:
         user, host, port = connection_string_tuple
         password = getpass.getpass()
 
-    metro_server_host, metro_server_port = __get_ssh_metro_server_connection_detail(args.ssh_metro_server_string)
+    metro_server_host, metro_server_port = _get_ssh_metro_server_connection_detail(args.ssh_metro_server_string)
 
 
 
