@@ -39,6 +39,7 @@ setup(
     version=find_version("sshmetroclient", "__init__.py"),
     description="An SSH tunnel client for SSH metro server",
     long_description=long_description,
+    url='https://github.com/thilux/ssh_metro_client',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
