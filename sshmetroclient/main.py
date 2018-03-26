@@ -2,6 +2,8 @@ import requests
 import pexpect
 import getpass
 import argparse
+import json
+import time
 
 
 parser = argparse.ArgumentParser()
@@ -14,6 +16,9 @@ parser.add_argument('ssh_metro_server_string', help='The specification of the SS
                                                     'specification can be in the form of "server_host:server_port" or '
                                                     '"server_host". In the latter, the default SSH metro server 9871 is'
                                                     ' assumed.')
+
+_METRO_API_PATH = 'api/v1/metro'
+_INFO_API_PATH = 'api/v1/info'
 
 
 def _get_target_connection_details(target_connection_string):
@@ -61,9 +66,9 @@ def _get_target_connection_details(target_connection_string):
         port = 22
 
     if password:
-        return user, password, host, port
+        return user, password, host, int(port)
     else:
-        return user, host, port
+        return user, host, int(port)
 
 
 def _get_ssh_metro_server_connection_detail(ssh_metro_server_conn_string):
@@ -86,7 +91,64 @@ def _get_ssh_metro_server_connection_detail(ssh_metro_server_conn_string):
         host = ssh_metro_server_conn_string
         port = 9871
 
-    return host, port
+    return host, int(port)
+
+
+def request_tunnel(username, password, host, port, metro_host, metro_port):
+    """
+    Issues a request to the metro server for a tunnel for an specified {host} and {port}, authenticated with a
+    {username} and {password}.
+
+    :param username: The username to connect to the indicated host.
+    :param password: The password for the provided username
+    :param host: The host to which a SSH tunnel is required
+    :param port: The port on the host to which a SSH tunnel is required
+    :param metro_host: The hostname where the SSH metro server is running
+    :param metro_port: The port where the SSH metro server is listening to
+    :return: a tuple in the form of (tunnel_host, tunnel_port)
+    """
+    headers = {'Content-Type': 'application/json'}
+    data = dict()
+    # data = {'username':'thilux', 'password':'P@uli2013', 'original_host':'192.168.0.211', 'original_port':22}
+    data['username'] = username
+    data['password'] = password
+    data['original_host'] = host
+    data['original_port'] = port
+
+    api_url = 'http://%s:%d/%s' % (metro_host, metro_port, _METRO_API_PATH)
+
+    response = requests.post(api_url, headers=headers, data=json.dumps(data))
+
+    if response.status_code != 201:
+        raise IOError('Error requesting tunnel to SSH metro server. Error from server: %s' %
+                      json.loads(response.content)['error'])
+
+    response_dict = json.loads(response.content)
+
+    return response_dict['metro_host'], response_dict['metro_port']
+
+
+def start_ssh_connection(username, password, host, port):
+    """
+    Starts the SSH connection to a host and port.
+
+    :param username: The username to establish the SSH connection
+    :param password: The password used for authentication
+    :param host: The host of the SSH server
+    :param port: The port of the SSH server
+    """
+    ssh_command = 'ssh %s@%s -p %d' % (username, host, port)
+    child = pexpect.spawn(ssh_command)
+    index = child.expect(['Are you sure you want to continue connecting', 'password', 'refused', 'timeout'])
+    if index in (2, 3):
+        # Connection error
+        raise IOError('Unable to connect to the specified SSH server!')
+    if index == 0:
+        child.sendline('yes')
+        child.expect('password:')
+    time.sleep(0.1)
+    child.sendline(password)
+    child.interact()
 
 
 def main():
@@ -95,16 +157,22 @@ def main():
     """
     args = parser.parse_args()
 
-    connection_string_tuple = _get_target_connection_details(args.target_connection_string)
-    if len(connection_string_tuple) == 4:
-        user, password, host, port = connection_string_tuple
-    else:
-        user, host, port = connection_string_tuple
-        password = getpass.getpass()
+    try:
 
-    metro_server_host, metro_server_port = _get_ssh_metro_server_connection_detail(args.ssh_metro_server_string)
+        connection_string_tuple = _get_target_connection_details(args.target_connection_string)
+        if len(connection_string_tuple) == 4:
+            user, password, host, port = connection_string_tuple
+        else:
+            user, host, port = connection_string_tuple
+            password = getpass.getpass()
 
+        metro_server_host, metro_server_port = _get_ssh_metro_server_connection_detail(args.ssh_metro_server_string)
 
+        tunnel_host, tunnel_port = request_tunnel(user, password, host, port, metro_server_host, metro_server_port)
+
+        start_ssh_connection(user, password, tunnel_host, tunnel_port)
+    except (IOError, TypeError) as err:
+        print('ERROR: %s' % str(err))
 
 
 if __name__ == '__main__':
