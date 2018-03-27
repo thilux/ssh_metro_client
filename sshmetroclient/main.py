@@ -4,6 +4,11 @@ import getpass
 import argparse
 import json
 import time
+import signal
+import struct
+import fcntl
+import termios
+import sys
 
 
 parser = argparse.ArgumentParser()
@@ -148,6 +153,14 @@ def start_ssh_connection(username, password, host, port):
         child.expect('password:')
     time.sleep(0.1)
     child.sendline(password)
+
+    # Handles the SIGWINCH signal and resizes the terminal accordingly
+    def handle_sigwinch(signal, frames):
+        s = struct.pack('HHHH', 0, 0, 0, 0)
+        a = struct.unpack('hhhh', fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, s))
+        child.setwinsize(a[0], a[1])
+
+    signal.signal(signal.SIGWINCH, handle_sigwinch)
     child.interact()
 
 
