@@ -154,11 +154,17 @@ def start_ssh_connection(username, password, host, port):
     time.sleep(0.1)
     child.sendline(password)
 
-    # Handles the SIGWINCH signal and resizes the terminal accordingly
-    def handle_sigwinch(signal, frames):
+    # Resizes the terminal based on the current window size of the terminal application being used.
+    def resize_terminal():
         s = struct.pack('HHHH', 0, 0, 0, 0)
         a = struct.unpack('hhhh', fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, s))
         child.setwinsize(a[0], a[1])
+
+    # Handles the SIGWINCH signal and resizes the terminal accordingly
+    def handle_sigwinch(signal, frames):
+        resize_terminal()
+
+    resize_terminal()
 
     signal.signal(signal.SIGWINCH, handle_sigwinch)
     child.interact()
