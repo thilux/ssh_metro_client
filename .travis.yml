@@ -1,0 +1,30 @@
+language: python
+sudo: false
+cache:
+  directories:
+    - $HOME/.cache/pip
+python:
+  - "2.7"
+  - "3.4"
+  - "3.5"
+  - "3.6"
+  - "3.7-dev"
+install:
+  # Ensure modern pip/etc to avoid some issues w/ older worker environs
+  - pip install pip==9.0.1 setuptools==36.6.0
+  # Self-install for setup.py-driven deps
+  - pip install -e .
+  # Installing pipenv
+  - pip install pipenv
+  # Syncing dependencies
+  - pipenv sync
+  - pipenv install codecov
+script:
+  # Running tests... still the old way.
+  # TODO: update to a more modern way
+  - python setup.py test
+notifications:
+  email:
+    - thilux.systems@gmail.com
+after_success:
+  - codecov
