@@ -1,5 +1,7 @@
 ## SSH metro client
 
+[![Build Status](https://travis-ci.org/thilux/ssh_metro_client.svg?branch=master)](https://travis-ci.org/thilux/ssh_metro_client) [![codecov](https://codecov.io/gh/thilux/ssh_metro_client/branch/master/graph/badge.svg)](https://codecov.io/gh/thilux/ssh_metro_client)
+
 Client application to communicate and connect to SSH tunnels started by an [SSH metro server]().
 
 The functionalities of this application is limited to request for SSH tunnels creation in an SSH metro server and connect to it via SSH.
