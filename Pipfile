@@ -10,7 +10,17 @@ name = "pypi"
 requests = "*"
 pexpect = "*"
 argparse = "*"
+flask = "*"
+paramiko = "==2.1.1"
+pycrypto = "*"
+twisted = "*"
+sshim = "*"
 
 
 [dev-packages]
 
+
+
+[pipenv]
+
+keep_outdated = true

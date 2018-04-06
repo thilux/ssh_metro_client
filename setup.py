@@ -33,6 +33,11 @@ requires = [
     'pexpect',
 ]
 
+test_requires = [
+    'sshim',
+    'flask',
+    'pycrypto'
+]
 
 setup(
     name="ssh_metro_client",
@@ -74,7 +79,8 @@ setup(
             "ssh_metro_client=sshmetroclient.main:main"
         ],
     },
-    tests_require=requires,
+    tests_require=test_requires,
+    test_suite='test_metro_client',
     install_requires=requires,
     zip_safe=False,
     python_requires='>=2.6, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*',
