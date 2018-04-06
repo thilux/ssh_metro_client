@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4a196266e605d44ad12544e8fdf84c955d9536068a6d0146330184cd329f1a90"
+            "sha256": "a444215c71e065682966e306c363703c834c64ead76cbc0767556ab46e4f45cc"
         },
         "host-environment-markers": {
             "implementation_name": "cpython",
@@ -185,12 +185,26 @@
             ],
             "version": "==1.0"
         },
+        "mock": {
+            "hashes": [
+                "sha256:5ce3c71c5545b472da17b72268978914d0252980348636840bd34a00b5cc96c1",
+                "sha256:b158b6df76edd239b8208d481dc46b6afd45a846b7812ff0ce58971cf5bc8bba"
+            ],
+            "version": "==2.0.0"
+        },
         "paramiko": {
             "hashes": [
                 "sha256:d66da6252b2de89ca06300af3782590ba7c2a0989d5f3aefa465c584cec6c31f",
                 "sha256:d51dada7ad0736c116f8bfe3263627925947e4a50e61436a83d58bfe7055b575"
             ],
             "version": "==2.1.1"
+        },
+        "pbr": {
+            "hashes": [
+                "sha256:de75cf1d510542c746beeff66b52241eb12c8f95f2ef846ee50ed5d72392caa4",
+                "sha256:56b7a8ba7d64bf6135a9dfefb85a80d95924b3fde5ed6343a1a1d464a040dae3"
+            ],
+            "version": "==4.0.1"
         },
         "pexpect": {
             "hashes": [

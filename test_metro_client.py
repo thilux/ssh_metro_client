@@ -10,10 +10,16 @@ import unittest
 import socket
 import time
 from sshmetroclient import main as metroclient
-from unittest import mock
+
 from fake_ssh_server import start_ssh_server
 from fake_metro_server import start_metro_server
 from multiprocessing import Process
+
+try:
+    from unittest import mock
+except ImportError:
+    # for Python 2.7 unittest does not have mock, so a mock library is used instead.
+    import mock
 
 
 def get_free_port():
