@@ -66,9 +66,17 @@ def _get_target_connection_details(target_connection_string):
         if len(conn_parts) != 2:
             raise TypeError(connection_string_format_error)
         host, port = conn_parts
+        try:
+            port = int(port)
+        except ValueError:
+            raise TypeError(connection_string_format_error)
+
     else:
         host = target_part
         port = 22
+
+    if not len(user) or not len(host):
+        raise TypeError(connection_string_format_error)
 
     if password:
         return user, password, host, int(port)
@@ -144,21 +152,26 @@ def start_ssh_connection(username, password, host, port):
     """
     ssh_command = 'ssh %s@%s -p %d' % (username, host, port)
     child = pexpect.spawn(ssh_command)
-    index = child.expect(['Are you sure you want to continue connecting', 'password', 'refused', 'timeout'])
-    if index in (2, 3):
+    index = child.expect(['Are you sure you want to continue connecting', '[Pp]assword', 'refused', 'timed out',
+                          'Could not resolve'])
+    if index in (2, 3, 4):
         # Connection error
         raise IOError('Unable to connect to the specified SSH server!')
     if index == 0:
         child.sendline('yes')
-        child.expect('password:')
+        child.expect('[Pp]assword:')
     time.sleep(0.1)
     child.sendline(password)
 
     # Resizes the terminal based on the current window size of the terminal application being used.
     def resize_terminal():
         s = struct.pack('HHHH', 0, 0, 0, 0)
-        a = struct.unpack('hhhh', fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, s))
-        child.setwinsize(a[0], a[1])
+        try:
+            # for testing no terminal is used so the below may fail with an IOerror and that is OK in this situation
+            a = struct.unpack('hhhh', fcntl.ioctl(sys.stdout.fileno(), termios.TIOCGWINSZ, s))
+            child.setwinsize(a[0], a[1])
+        except IOError:
+            pass
 
     # Handles the SIGWINCH signal and resizes the terminal accordingly
     def handle_sigwinch(signal, frames):
@@ -190,9 +203,11 @@ def main(system_args):
         tunnel_host, tunnel_port = request_tunnel(user, password, host, port, metro_server_host, metro_server_port)
 
         start_ssh_connection(user, password, tunnel_host, tunnel_port)
+        # sys.exit(0)  # success
     except (IOError, TypeError) as err:
         print('ERROR: %s' % str(err))
+        sys.exit(1)  # error
 
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    main(sys.argv)
