@@ -21,7 +21,8 @@ install:
 script:
   # Running tests... still the old way.
   # TODO: update to a more modern way
-  - python setup.py test
+  - python -m coverage run setup.py test
+  - python -m coverage report
 notifications:
   email:
     - thilux.systems@gmail.com
