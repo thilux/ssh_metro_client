@@ -134,9 +134,9 @@ def request_tunnel(username, password, host, port, metro_host, metro_port):
 
     if response.status_code != 201:
         raise IOError('Error requesting tunnel to SSH metro server. Error from server: %s' %
-                      json.loads(response.content)['error'])
+                      response.json()['error'])
 
-    response_dict = json.loads(response.content)
+    response_dict = response.json()
 
     return response_dict['metro_host'], response_dict['metro_port']
 
